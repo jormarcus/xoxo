@@ -14,14 +14,22 @@ function boardReducer(board=Map(), action) {
   return board
 }
 
-function reducer(state={}, action) {
+export function move(player, coord){
+  return {
+    type: MOVE,
+    player,
+    coord,
+  }
+}
+
+export default function gameReducer(state={}, action) {
   return {
     board: boardReducer(state.board, action),
     turn: turnReducer(state.turn, action),
   }
 }
 
-reducer(undefined, {
+gameReducer(undefined, {
   type: MOVE,
   coord: [1, 1],
   player: 'X',
@@ -30,7 +38,7 @@ reducer(undefined, {
 //row is an object of the row num from the board
 function checkRow (board, row, marker) {
   //if marker is blank return false
-  if (marker !== 'X' || marker !== 'O') {
+  if (marker == null || marker === "_") {
     return false;
   }
   //if the marker is x or o check if the the rest of the row hs the same marker
@@ -42,7 +50,7 @@ function checkRow (board, row, marker) {
 
 function checkCol (board, col, marker) {
   //if marker is blank return false
-  if (marker !== 'X' || marker !== 'O') {
+  if (marker == null || marker === "_") {
     return false;
   }
   if (board.getIn([0, col]) === marker && board.getIn([1, col]) === marker && board.getIn([2, col]) === marker) {
@@ -73,27 +81,41 @@ function checkLeftDiag (board) {
   return false;
 }
 
-function winner (board) {
+export function winner(board){
+  const [result, victor] = hasWinner(board);
+  if (result){
+    if (victor === null) {
+      console.log(`Draw!`);
+    } else {
+      console.log(`winner is: ${victor}`);
+    }
+    process.exit(0);
+  }
+}
+
+function hasWinner (board) {
   for (let i = 0 ; i < 3; i++) {
     //case row if row has winner
     if (checkRow(board, i, board.getIn([i, 0]))) {
-      return true;
+      return [true, board.getIn([i, 0])];
     }
     //case col
     if (checkCol(board, i, board.getIn([0, i]))) {
-      return true;
+      return [true, board.getIn([i, 0])];
     }
   }
-  if (checkRightDiag(board) || checkLeftDiag(board)) {
-    return true;
+  if (checkRightDiag(board) ) {
+    return [true, board.getIn([0, 0])];
   }
-
+  if(checkLeftDiag(board)){
+    return [true, board.getIn([0, 2])];
+  }
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
-      if (board.getIn([i, j]) === '_') {
-        return false;
+      if (board.getIn([i, j]) === '_' || board.getIn([i, j]) == null) {
+        return [false, null];
       } 
     }
   }
-  return true;
+  return [true, null];
 }

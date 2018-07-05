@@ -1,6 +1,6 @@
 import inquirer from 'inquirer'
 
-import gameReducer, {move} from './game'
+import gameReducer, {move, winner} from './game'
 import {createStore} from 'redux'
 
 const printBoard = () => {
@@ -33,10 +33,10 @@ const game = createStore(gameReducer)
 
 // Debug: Print the state
 // game.subscribe(() => console.log(game.getState()))
-// if (!winner()) {
-  game.subscribe(printBoard)
-  game.subscribe(getInput('X'))
-  game.subscribe(getInput('O'))
+game.subscribe(printBoard)
+game.subscribe(getInput('X'))
+game.subscribe(getInput('O'))
+game.subscribe((() => winner(game.getState().board)));
 // }
 
 // We dispatch a dummy START action to call all our
