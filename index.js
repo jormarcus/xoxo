@@ -12,7 +12,10 @@ const printBoard = () => {
     process.stdout.write('\n')
   }
 }
-
+// game = {
+//   board: Map
+//   turn: 'X'
+// }
 const getInput = player => async () => {
   const {turn} = game.getState()  
   if (turn !== player) return
