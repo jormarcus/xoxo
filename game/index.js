@@ -1,16 +1,15 @@
 import {Map} from 'immutable'
+import { stat } from 'fs';
 
 const MOVE = 'MOVE'
 
 function turnReducer(turn='X', action) {
-  if (action.type === MOVE)
-    return turn === 'X' ? 'O' : 'X'
+  if (action.type === MOVE) return turn === 'X' ? 'O' : 'X';
   return turn
 }
 
 function boardReducer(board=Map(), action) {
-  if (action.type === MOVE)
-    return board.setIn(action.coord, action.player)
+  if (action.type === MOVE) return board.setIn(action.coord, action.player)
   return board
 }
 
@@ -22,18 +21,35 @@ export function move(player, coord){
   }
 }
 
+export function bad (state, action) {
+  if (action.coord && action.coord.some(coord => coord < 0 || coord > 2)) {
+    return `Invalid input`;
+  }
+  if (action.player !== state.turn) {
+    return `Player ${state.turn} it is not your turn!`
+  }
+  if (state.board && state.board.getIn(action.coord)) {
+    return `Square is already taken.`
+  }
+
+  return null;
+}
+
 export default function gameReducer(state={}, action) {
+  if (bad(state, action)) {
+    return {...state, error: bad(state, action)}
+  }
   return {
     board: boardReducer(state.board, action),
     turn: turnReducer(state.turn, action),
   }
 }
 
-gameReducer(undefined, {
-  type: MOVE,
-  coord: [1, 1],
-  player: 'X',
-})
+// gameReducer(undefined, {
+//   type: MOVE,
+//   coord: [1, 1],
+//   player: 'X',
+// })
 
 //row is an object of the row num from the board
 function checkRow (board, row, marker) {

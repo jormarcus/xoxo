@@ -12,10 +12,7 @@ const printBoard = () => {
     process.stdout.write('\n')
   }
 }
-// game = {
-//   board: Map
-//   turn: 'X'
-// }
+
 const getInput = player => async () => {
   const {turn} = game.getState()  
   if (turn !== player) return
@@ -37,7 +34,11 @@ game.subscribe(printBoard)
 game.subscribe(getInput('X'))
 game.subscribe(getInput('O'))
 game.subscribe((() => winner(game.getState().board)));
-// }
+game.subscribe(() => {
+  if (game.getState().error) {
+    console.log(game.getState().error);
+  }
+});
 
 // We dispatch a dummy START action to call all our
 // subscribers the first time.
