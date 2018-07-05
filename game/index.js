@@ -1,47 +1,99 @@
 import {Map} from 'immutable'
 
-// {
-//   1: {
-//     1: X
-//     2: null
-//     3: O
-//   }
-//   2:
-//   3:
-// }
+const MOVE = 'MOVE'
 
-let board = Map();
-for (let row = 0; row < 3; row++){
-  for (let col = 0; col < 3; col++){
-    board = board.setIn([row, col], '_')
-  }
+function turnReducer(turn='X', action) {
+  if (action.type === MOVE)
+    return turn === 'X' ? 'O' : 'X'
+  return turn
 }
-const turn = 'X';
 
-const MOVE = 'MOVE';
+function boardReducer(board=Map(), action) {
+  if (action.type === MOVE)
+    return board.setIn(action.coord, action.player)
+  return board
+}
 
-//action generator
-export function move(player, position){
+function reducer(state={}, action) {
   return {
-    type: MOVE,
-    position, //[row, col]
-    player,
+    board: boardReducer(state.board, action),
+    turn: turnReducer(state.turn, action),
   }
 }
 
-export default function gameReducer(state = { board, turn }, action) {
-  // TODO
-  switch( action.type ){
-    case MOVE:
-      return {
-        board: state.board.setIn(action.position, action.player),
-        turn: action.player === 'X' ? 'O' : 'X',
-      };
-    default:
-      return state;
+reducer(undefined, {
+  type: MOVE,
+  coord: [1, 1],
+  player: 'X',
+})
+
+//row is an object of the row num from the board
+function checkRow (board, row, marker) {
+  //if marker is blank return false
+  if (marker !== 'X' || marker !== 'O') {
+    return false;
   }
+  //if the marker is x or o check if the the rest of the row hs the same marker
+  if (board.getIn([row, 0]) === marker && board.getIn([row, 1]) === marker && board.getIn([row, 2]) === marker) {
+    return true;
+  }
+  return false;
 }
 
-// module.exports = {
-//   move
-// }
+function checkCol (board, col, marker) {
+  //if marker is blank return false
+  if (marker !== 'X' || marker !== 'O') {
+    return false;
+  }
+  if (board.getIn([0, col]) === marker && board.getIn([1, col]) === marker && board.getIn([2, col]) === marker) {
+    return true;
+  }
+  return false;
+}
+
+function checkRightDiag (board) {
+  let marker = board.getIn([0, 0]);
+  if (marker !== 'X' || marker !== 'O') {
+    return false;
+  }
+  if (board.getIn([0, 0]) === marker && board.getIn([1, 1]) === marker && board.getIn([2, 2]) === marker) {
+    return true;
+  }
+  return false;
+}
+
+function checkLeftDiag (board) {
+  let marker = board.getIn([0, 2]);
+  if (marker !== 'X' || marker !== 'O') {
+    return false;
+  }
+  if (board.getIn([0, 2]) === marker && board.getIn([1, 1]) === marker && board.getIn([2, 0]) === marker) {
+    return true;
+  }
+  return false;
+}
+
+function winner (board) {
+  for (let i = 0 ; i < 3; i++) {
+    //case row if row has winner
+    if (checkRow(board, i, board.getIn([i, 0]))) {
+      return true;
+    }
+    //case col
+    if (checkCol(board, i, board.getIn([0, i]))) {
+      return true;
+    }
+  }
+  if (checkRightDiag(board) || checkLeftDiag(board)) {
+    return true;
+  }
+
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      if (board.getIn([i, j]) === '_') {
+        return false;
+      } 
+    }
+  }
+  return true;
+}

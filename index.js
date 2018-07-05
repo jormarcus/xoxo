@@ -33,10 +33,11 @@ const game = createStore(gameReducer)
 
 // Debug: Print the state
 // game.subscribe(() => console.log(game.getState()))
-
-game.subscribe(printBoard)
-game.subscribe(getInput('X'))
-game.subscribe(getInput('O'))
+// if (!winner()) {
+  game.subscribe(printBoard)
+  game.subscribe(getInput('X'))
+  game.subscribe(getInput('O'))
+// }
 
 // We dispatch a dummy START action to call all our
 // subscribers the first time.
